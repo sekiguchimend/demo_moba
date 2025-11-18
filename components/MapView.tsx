@@ -163,12 +163,12 @@ export default function MapView({ onPersonClick }: MapViewProps) {
           `);
 
           // マーカーにマウスオーバー時のみツールチップを表示
-          marker.on('mouseover', function() {
-            this.bindTooltip(tooltip).openTooltip();
+          marker.on('mouseover', () => {
+            marker.bindTooltip(tooltip).openTooltip();
           });
 
-          marker.on('mouseout', function() {
-            this.closeTooltip();
+          marker.on('mouseout', () => {
+            marker.closeTooltip();
           });
 
           // マーカーをクリックしたときに直接チャットを開く（ツールチップは閉じる）
