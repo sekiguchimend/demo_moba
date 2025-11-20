@@ -109,32 +109,36 @@ export default function UserMapView() {
         });
 
         // 現在地ボタンの機能
-        const locateControl = L.control({ position: 'topright' });
-        locateControl.onAdd = () => {
-          const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
-          div.innerHTML = `
-            <button style="
-              width: 40px;
-              height: 40px;
-              background: #fff;
-              border: 2px solid rgba(50, 50, 50, 0.2);
-              border-radius: 4px;
-              cursor: pointer;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            ">
-              <svg width="20" height="20" fill="#323232" viewBox="0 0 24 24">
-                <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
-              </svg>
-            </button>
-          `;
-          div.onclick = () => {
-            map.setView(userLocation, 16);
-          };
-          return div;
-        };
-        locateControl.addTo(map);
+        const LocateControl = L.Control.extend({
+          options: {
+            position: 'topright'
+          },
+          onAdd: function () {
+            const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+            div.innerHTML = `
+              <button style="
+                width: 40px;
+                height: 40px;
+                background: #fff;
+                border: 2px solid rgba(50, 50, 50, 0.2);
+                border-radius: 4px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              ">
+                <svg width="20" height="20" fill="#323232" viewBox="0 0 24 24">
+                  <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+                </svg>
+              </button>
+            `;
+            div.onclick = () => {
+              map.setView(userLocation, 16);
+            };
+            return div;
+          }
+        });
+        new LocateControl().addTo(map);
       });
     }
   }, []);
