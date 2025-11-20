@@ -75,7 +75,97 @@ export default function UserMapView() {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // 自分の位置マーカーを追加
+        // ルートの座標を定義（渋谷→表参道→新宿）
+        const routePoints: [number, number][] = [
+          [35.6580, 139.7016], // 渋谷駅
+          [35.6654, 139.7126], // 表参道
+          [35.6895, 139.7006]  // 新宿駅
+        ];
+
+        // ルートラインを地図に追加
+        const routeLine = L.polyline(routePoints, {
+          color: '#ff0000',
+          weight: 4,
+          opacity: 0.8,
+          smoothFactor: 1
+        }).addTo(map);
+
+        // ルート全体が見えるように地図の表示範囲を調整
+        map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });
+
+        // 出発地マーカー
+        const startIcon = L.divIcon({
+          html: `
+            <div style="
+              width: 24px;
+              height: 24px;
+              background: #323232;
+              border: 3px solid #fff;
+              border-radius: 50%;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            "></div>
+          `,
+          className: 'start-marker',
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+        });
+        L.marker(routePoints[0], { icon: startIcon })
+          .bindTooltip('渋谷駅（出発）', { permanent: false, direction: 'top' })
+          .addTo(map);
+
+        // 経由地マーカー
+        const waypointIcon = L.divIcon({
+          html: `
+            <div style="
+              width: 20px;
+              height: 20px;
+              background: #fff;
+              border: 3px solid #323232;
+              border-radius: 50%;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            "></div>
+          `,
+          className: 'waypoint-marker',
+          iconSize: [20, 20],
+          iconAnchor: [10, 10],
+        });
+        L.marker(routePoints[1], { icon: waypointIcon })
+          .bindTooltip('表参道（経由）', { permanent: false, direction: 'top' })
+          .addTo(map);
+
+        // 目的地マーカー
+        const endIcon = L.divIcon({
+          html: `
+            <div style="
+              width: 24px;
+              height: 24px;
+              background: #323232;
+              border: 3px solid #fff;
+              border-radius: 50%;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+              position: relative;
+            ">
+              <div style="
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 8px;
+                height: 8px;
+                background: #fff;
+                border-radius: 50%;
+              "></div>
+            </div>
+          `,
+          className: 'end-marker',
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+        });
+        L.marker(routePoints[2], { icon: endIcon })
+          .bindTooltip('新宿駅（目的地）', { permanent: false, direction: 'top' })
+          .addTo(map);
+
+        // 自分の位置マーカーを追加（現在地を渋谷付近に設定）
         const myMarker = L.marker(userLocation, { icon: myLocationIcon })
           .addTo(map);
 
@@ -146,6 +236,79 @@ export default function UserMapView() {
   return (
     <div className="relative h-full w-full">
       <div ref={mapRef} className="h-full w-full" />
+
+      {/* ルート簡易表示 */}
+      <div className="absolute bottom-4 left-4 right-4 bg-[#fff] rounded-lg shadow-lg border border-[#323232]/10 p-4">
+        <div className="flex items-start gap-3">
+          {/* ルートアイコン */}
+          <div className="flex-shrink-0 w-10 h-10 bg-[#323232] rounded-full flex items-center justify-center">
+            <svg className="w-6 h-6 text-[#fff]" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>
+            </svg>
+          </div>
+
+          {/* ルート情報 */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="text-sm font-semibold text-[#323232]">現在のルート</h3>
+              <span className="text-xs px-2 py-0.5 bg-[#323232] text-[#fff] rounded-full">進行中</span>
+            </div>
+
+            <div className="space-y-1.5">
+              {/* 出発地 */}
+              <div className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 bg-[#323232] rounded-full mt-1.5 flex-shrink-0"></div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs text-[#323232]/60">出発</div>
+                  <div className="text-sm text-[#323232] font-medium truncate">渋谷駅</div>
+                </div>
+              </div>
+
+              {/* 経由地 */}
+              <div className="flex items-start gap-2 pl-0.5">
+                <div className="w-px h-4 bg-[#323232]/30 ml-0.5"></div>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 bg-[#323232]/50 rounded-full mt-1.5 flex-shrink-0"></div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs text-[#323232]/60">経由</div>
+                  <div className="text-sm text-[#323232] truncate">表参道</div>
+                </div>
+              </div>
+
+              {/* 到着地 */}
+              <div className="flex items-start gap-2 pl-0.5">
+                <div className="w-px h-4 bg-[#323232]/30 ml-0.5"></div>
+              </div>
+
+              <div className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 bg-[#323232] rounded-full mt-1.5 flex-shrink-0"></div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs text-[#323232]/60">目的地</div>
+                  <div className="text-sm text-[#323232] font-medium truncate">新宿駅</div>
+                </div>
+              </div>
+            </div>
+
+            {/* 距離と時間 */}
+            <div className="flex items-center gap-4 mt-3 pt-3 border-t border-[#323232]/10">
+              <div className="flex items-center gap-1.5 text-xs text-[#323232]/70">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
+                </svg>
+                <span>約 2.5km</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-[#323232]/70">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+                </svg>
+                <span>残り 15分</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
