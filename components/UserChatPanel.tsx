@@ -22,6 +22,13 @@ export default function UserChatPanel({ onClose }: UserChatPanelProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // メッセージテンプレート
+  const messageTemplates = [
+    '到着しました。',
+    '少し遅れます。',
+    '了解しました。',
+  ];
+
   const handleSendMessage = () => {
     if (message.trim() || selectedImage) {
       const newMessage: Message = {
@@ -53,6 +60,10 @@ export default function UserChatPanel({ onClose }: UserChatPanelProps) {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleTemplateClick = (template: string) => {
+    setMessage(template);
   };
 
   return (
@@ -110,6 +121,19 @@ export default function UserChatPanel({ onClose }: UserChatPanelProps) {
 
       {/* Input */}
       <div className="border-t border-[#323232]/10 p-4 bg-[#fff]">
+        {/* Message Templates */}
+        <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
+          {messageTemplates.map((template, index) => (
+            <button
+              key={index}
+              onClick={() => handleTemplateClick(template)}
+              className="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-[#323232] bg-[#fff] border border-[#323232]/20 rounded-full hover:bg-[#323232]/5 transition-colors"
+            >
+              {template}
+            </button>
+          ))}
+        </div>
+
         {/* Image Preview */}
         {selectedImage && (
           <div className="mb-3 relative inline-block">
