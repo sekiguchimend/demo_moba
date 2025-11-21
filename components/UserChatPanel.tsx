@@ -20,6 +20,7 @@ export default function UserChatPanel({ onClose }: UserChatPanelProps) {
     { id: 1, type: 'received', text: '現在地を共有しています。何かあればこちらからご連絡ください。', time: '14:00' },
   ]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // メッセージテンプレート
@@ -66,8 +67,49 @@ export default function UserChatPanel({ onClose }: UserChatPanelProps) {
     setMessage(template);
   };
 
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // 子要素から出る場合は無視
+    if (e.currentTarget === e.target) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files[0] && files[0].type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setSelectedImage(event.target?.result as string);
+      };
+      reader.readAsDataURL(files[0]);
+    }
+  };
+
   return (
-    <div className="h-full bg-[#fff] flex flex-col">
+    <div
+      className="h-full bg-[#fff] flex flex-col relative"
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       {/* Header */}
       <div className="bg-[#fff] border-b border-[#323232]/10 px-4 py-3 flex items-center gap-3">
         <svg className="w-8 h-8 text-[#323232]" fill="currentColor" viewBox="0 0 24 24">
@@ -189,6 +231,19 @@ export default function UserChatPanel({ onClose }: UserChatPanelProps) {
           </button>
         </div>
       </div>
+
+      {/* Drag and Drop Overlay */}
+      {isDragging && (
+        <div className="absolute inset-0 bg-[#323232]/80 flex items-center justify-center z-50 pointer-events-none">
+          <div className="bg-[#fff] rounded-2xl p-8 text-center shadow-2xl">
+            <svg className="w-16 h-16 mx-auto mb-4 text-[#323232]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <p className="text-lg font-semibold text-[#323232]">画像をドロップ</p>
+            <p className="text-sm text-[#323232]/60 mt-1">ここに画像をドロップしてください</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
